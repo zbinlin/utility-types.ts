@@ -1,0 +1,21 @@
+{
+  "name": "@cites/utility-types",
+  "version": "0.0.1",
+  "description": "Utility Types Collection for TypeScript",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf ./dist",
+    "build": "tsc"
+  },
+  "exports": {
+    "default": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
