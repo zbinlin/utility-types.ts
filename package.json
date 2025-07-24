@@ -1,6 +1,6 @@
 {
   "name": "@cites/utility-types",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Utility Types Collection for TypeScript",
   "type": "module",
   "scripts": {
