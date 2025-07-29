@@ -217,3 +217,32 @@ export type DeepNonNullable<T> =
     T extends object ? {
         [P in keyof T]-?: DeepNonNullable<NonNullable<T[P]>>
     } : NonNullable<T>;
+
+
+
+export type IsTuple<T> = T extends readonly [...infer _]
+    ? number extends T["length"] ? false : true
+    : false;
+
+
+export type IsExactly<T, U> = U extends infer K ? ([T] extends [K]
+    ? [K] extends [T] ? true : false
+    : false) : never;
+
+
+type IsExtendable<T, U> = unknown extends U ? (
+	unknown extends T ? true : false
+) : [T] extends [U] ? true : false
+
+
+export type OmitTypes<T, K> =
+    T extends Function ? T :
+    IsTuple<T> extends true ? {
+        [I in keyof T]: IsExtendable<T[I], K> extends true ? never : OmitTypes<T[I], K>
+    } :
+    T extends Array<infer U> ? Array<OmitTypes<U, K>> :
+    T extends ReadonlyArray<infer U> ? ReadonlyArray<OmitTypes<U, K>> :
+    T extends object ? {
+        [Key in KnownKeys<T> as IsExtendable<T[Key], K> extends true ? never : Key]: OmitTypes<T[Key], K>
+    } :
+    T;
