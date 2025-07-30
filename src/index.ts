@@ -219,6 +219,8 @@ export type DeepNonNullable<T> =
     } : NonNullable<T>;
 
 
+export type Primitive = string | number | boolean | bigint | symbol | null | undefined;
+
 
 export type IsTuple<T> = T extends readonly [...infer _]
     ? number extends T["length"] ? false : true
@@ -232,17 +234,36 @@ export type IsExactly<T, U> = U extends infer K ? ([T] extends [K]
 
 type IsExtendable<T, U> = unknown extends U ? (
 	unknown extends T ? true : false
-) : [T] extends [U] ? true : false
+) : [T] extends [U] ? true : false;
 
 
-export type OmitTypes<T, K> =
+type FilterTupleHelper<
+    T extends readonly any[],
+    K,
+    C extends readonly any[],
+    FilterTupleMode extends "filter" | "preserve",
+> = T extends readonly [infer Head, ...infer Tail]
+    ? FilterTupleHelper<
+        Tail,
+        K,
+        IsExtendable<Head, K> extends true
+            ? C
+            : [...C, OmitTypes<Head, K, FilterTupleMode>],
+        FilterTupleMode
+    >
+    : C;
+
+export type OmitTypes<T, K, FilterTupleMode extends "filter" | "preserve" = "preserve"> =
+    T extends Primitive ? T :
     T extends Function ? T :
-    IsTuple<T> extends true ? {
-        [I in keyof T]: IsExtendable<T[I], K> extends true ? never : OmitTypes<T[I], K>
-    } :
-    T extends Array<infer U> ? Array<OmitTypes<U, K>> :
-    T extends ReadonlyArray<infer U> ? ReadonlyArray<OmitTypes<U, K>> :
+    T extends readonly any[] ? (
+        IsTuple<T> extends true ? FilterTupleMode extends "filter" ? FilterTupleHelper<T, K, [], FilterTupleMode> : {
+            [I in keyof T]: IsExtendable<T[I], K> extends true ? never : OmitTypes<T[I], K, FilterTupleMode>
+        } :
+        T extends Array<infer U> ? Array<OmitTypes<U, K, FilterTupleMode>> :
+        T extends ReadonlyArray<infer U> ? ReadonlyArray<OmitTypes<U, K, FilterTupleMode>> : never
+    ) :
     T extends object ? {
-        [Key in KnownKeys<T> as IsExtendable<T[Key], K> extends true ? never : Key]: OmitTypes<T[Key], K>
+        [Key in KnownKeys<T> as IsExtendable<T[Key], K> extends true ? never : Key]: OmitTypes<T[Key], K, FilterTupleMode>
     } :
     T;
